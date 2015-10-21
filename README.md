@@ -17,7 +17,7 @@ $ npm install && npm start
 $ curl -X POST -H 'Content-type: application/json' -d  '{"url":"http://host/some.imgage.jpg"}' 'http://localhost:5454/maps'
 
 
- Server returns you a url to the thumnailed image :
+ Server returns you a url to the thumbnailed image :
 =====================================
 { 'url': 'http://localhost:5454/085c123a' }
 

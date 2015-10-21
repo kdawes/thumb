@@ -34,6 +34,12 @@ router.post('maps', {stream: true}, function () {
   this.req.pipe(concat(function (body) {
     try {
       var obj = JSON.parse(body.toString('utf-8'))
+      var premapped = api.getByUrl(obj.url)
+      if (premapped) {
+        var combined = [URL, premapped[1]].join('')
+        console.log('Using PREMAP ' + JSON.stringify(premapped) + ' => ' + combined)
+        return self.res.json({'url': combined})
+      }
       api.putMap(obj, function (err, url) {
         console.log('and done... ' + url)
         if (err) {
@@ -48,7 +54,7 @@ router.post('maps', {stream: true}, function () {
     } catch (err) {
       console.log('trycatch error /maps')
       self.res.writeHead(500)
-      self.res.end('error' + JSON.stringify(err))
+      self.res.end('error' + err)
     }
   }))
 })

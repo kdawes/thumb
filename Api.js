@@ -3,6 +3,7 @@ var Pouchdb = require('pouchdb')
 Pouchdb.plugin(require('pouchdb-find'))
 var hat = require('hat')
 var fs = require('fs')
+var path = require('path')
 var request = require('request')
 var easyimage = require('easyimage')
 
@@ -13,9 +14,9 @@ const HEIGHT = 120
 // todo make this a transform stream
 function dlAndProcess (opts, cb) {
   console.log('dl and proccess, fn1')
-  var fn = [STATIC, hat().slice(0, 8)].join('')
+  var fn = [STATIC, '/', hat().slice(0, 8)].join('')
   console.log('fn2')
-  var fn2 = [STATIC, hat().slice(0, 8)].join('')
+  var fn2 = [STATIC, '/', hat().slice(0, 8)].join('')
   console.log('dl and proccess ' + fn + ' ' + fn2)
   var osFull = fs.createWriteStream(fn)
   console.log('constructing promise')
@@ -59,6 +60,24 @@ function Api (opts) {
   }
   console.log('API ' + JSON.stringify(opts, null, 2))
   this.db = new Pouchdb(opts.path)
+  this.mapping = (function () {
+    var m = {}
+    this.getMaps(function (e, r) {
+      console.log('rebuilding mappings ')
+      r.rows.forEach(function (row) {
+        var k = path.basename(row.doc.static)
+        m[row.doc.url] = [row.doc._id, k]
+      })
+      console.log(JSON.stringify(m))
+    })
+    return m
+  }.bind(this))()
+
+}
+
+Api.prototype.getByUrl = function (url) {
+  console.log('getByUrl ' + url)
+  return this.mapping[url]
 }
 
 Api.prototype.getMaps = function (cb) {
@@ -72,12 +91,22 @@ Api.prototype.getMaps = function (cb) {
 }
 
 Api.prototype.putMap = function (opts, cb) {
-  console.log('putMap')
-
+  var self = this
+  console.log('putMap : mappsings ' + JSON.stringify(self.mapping))
   dlAndProcess(opts, function (err, url) {
     if (err) { return cb(err, null) }
+    opts.static = url
+    opts.timestamp = new Date().getTime()
+    self.db.post(opts).then(function (r) {
+      console.log('Recorded : ' + JSON.stringify(r))
+      console.log('Mappings before : ' + JSON.stringify(self.mapping, null, 2))
+      self.mapping[opts.url] = [r.id, path.basename(opts.static)]
+      console.log('Mappings are now : ' + JSON.stringify(self.mapping, null, 2))
+    }).catch(function (err) {
+      console.log('error updating maps in putMap' + err)
+    })
     return cb(null, url)
-  })
+  }.bind(this))
 }
 
 exports = module.exports = Api
