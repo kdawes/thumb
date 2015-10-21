@@ -1,4 +1,4 @@
- trivial thumbnailer service thing with imagemagick
+  trivial thumbnailer service thing 
  ===================================================
 
 Dependencies :
