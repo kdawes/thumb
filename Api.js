@@ -41,15 +41,15 @@ function dlAndProcess (opts, cb) {
     }).then(function (file) {
       console.log('done!')
       fs.unlink(f)
-      cb(null, fn2)
+      return cb(null, fn2)
     }).catch(function (err) {
       console.log('error resizing ' + err)
       fs.unlink(f)
-      cb(err, null)
+      return cb(err, null)
     })
   }).catch(function (err) {
     console.log('error resizing ' + err)
-    cb(err, null)
+    return cb(err, null)
   })
 }
 
@@ -92,7 +92,7 @@ Api.prototype.getMaps = function (cb) {
 
 Api.prototype.putMap = function (opts, cb) {
   var self = this
-  console.log('putMap : mappsings ' + JSON.stringify(self.mapping))
+  console.log('putMap : mappings ' + JSON.stringify(self.mapping))
   dlAndProcess(opts, function (err, url) {
     if (err) { return cb(err, null) }
     opts.static = url

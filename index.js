@@ -5,6 +5,7 @@ var union = require('union')
 var router = new director.http.Router()
 var ecstatic = require('ecstatic')
 var path = require('path')
+var cors = require('cors')
 
 const DB_PATH = './db/maps.pouchdb'
 const PROTO = 'http'
@@ -29,7 +30,8 @@ router.get('/maps', function () {
   }.bind(this))
 })
 
-router.post('maps', {stream: true}, function () {
+router.post('/maps', {stream: true}, function () {
+  console.log('router POST maps')
   var self = this
   this.req.pipe(concat(function (body) {
     try {
@@ -41,15 +43,17 @@ router.post('maps', {stream: true}, function () {
         return self.res.json({'url': combined})
       }
       api.putMap(obj, function (err, url) {
-        console.log('and done... ' + url)
+        // console.log('and done... ' + url)
         if (err) {
           console.log('error' + err)
           self.res.writeHead(500)
           self.res.end(err)
+          return
         }
 
         let ret = [URL, path.basename(url)].join('')
         self.res.json({'url': ret})
+        return
       })
     } catch (err) {
       console.log('trycatch error /maps')
@@ -62,8 +66,8 @@ router.post('maps', {stream: true}, function () {
 var server = union.createServer({
   buffer: false,
   before: [
+    cors(),
     function (req, res) {
-      res.setHeader('Access-Control-Allow-Origin', '*')
       router.dispatch(req, res, function (err) {
         if (err) {
           res.emit('next')

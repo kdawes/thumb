@@ -21,6 +21,7 @@
   "homepage": "https://github.com/kdawes/thumb",
   "dependencies": {
     "concat-stream": "^1.5.1",
+    "cors": "^2.7.1",
     "director": "^1.2.8",
     "easyimage": "^2.1.0",
     "ecstatic": "^1.1.3",
