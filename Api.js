@@ -13,11 +13,11 @@ const HEIGHT = 120
 
 // todo make this a transform stream
 function dlAndProcess (opts, cb) {
-  console.log('dl and proccess, fn1')
   var fn = [STATIC, '/', hat().slice(0, 8)].join('')
-  console.log('fn2')
   var fn2 = [STATIC, '/', hat().slice(0, 8)].join('')
+
   console.log('dl and proccess ' + fn + ' ' + fn2)
+
   var osFull = fs.createWriteStream(fn)
   console.log('constructing promise')
   var p = new Promise(
@@ -32,20 +32,16 @@ function dlAndProcess (opts, cb) {
   )
 
   p.then(function (f) {
-    console.log('resize ' + f)
+    console.log('resizing ' + f + ' => ' + fn2)
     easyimage.resize({
       'src': f,
       'dst': fn2,
       'width': WIDTH,
       'height': HEIGHT
     }).then(function (file) {
-      console.log('done!')
+      console.log('done resizing!')
       fs.unlink(f)
       return cb(null, fn2)
-    }).catch(function (err) {
-      console.log('error resizing ' + err)
-      fs.unlink(f)
-      return cb(err, null)
     })
   }).catch(function (err) {
     console.log('error resizing ' + err)
@@ -77,7 +73,7 @@ function Api (opts) {
 
 Api.prototype.getByUrl = function (url) {
   console.log('getByUrl ' + url)
-  return this.mapping[url]
+  return this.mapping[url] ? this.mapping[url] : null
 }
 
 Api.prototype.getMaps = function (cb) {

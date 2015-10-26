@@ -31,5 +31,10 @@
     "request": "^2.65.0",
     "tap": "^2.1.1",
     "union": "^0.4.4"
+  },
+  "devDependencies": {
+    "nock": "^2.15.0",
+    "rimraf": "^2.4.3",
+    "shelljs": "^0.5.3"
   }
 }
