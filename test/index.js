@@ -8,8 +8,12 @@ var request = require('request')
 var hat = require('hat')
 var shell = require('shelljs')
 
+function fakeDbName () {
+  return ['./db/fake', hat()].join('')
+}
+
 function setup (opts) {
-  var dbPath = ['./db/fake', hat()].join('')
+  var dbPath = fakeDbName()
   var opts = opts || {'path': path.resolve(dbPath)}
   api = new Api(opts)
   opts.api = api
@@ -84,6 +88,11 @@ test('getByUrl[null] returns null', function (t) {
 test('getByUrl(undefined) returns null', function (t) {
   var opts = setup()
   t.equal(opts.api.getByUrl(undefined), null, 'getByUrl(null) returns null')
+  t.end()
+})
+
+test('the instanceof magic works', function (t) {
+  t.ok(Api({'path': fakeDbName()}) instanceof Api, 'Api instanceof Api')
   t.end()
 })
 
