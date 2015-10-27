@@ -6,8 +6,6 @@ var router = new director.http.Router()
 var ecstatic = require('ecstatic')
 var path = require('path')
 var cors = require('cors')
-var shell = require('shelljs')
-var async = require('async')
 
 var log = (process.env.NODE_ENV === 'development') ?
   console.log.bind(console, 'DBG>') : function () {}
@@ -93,14 +91,4 @@ function go () {
   log('Server listening : 5454 @' + path.resolve(STATIC))
 }
 
-async.series([
-  function (cb) {
-    var cleanupDb = ['rm -rf ', path.resolve(DB_PATH)].join('')
-    var cleanupStatic = ['rm -f ', STATIC, '/*'].join('')
-    shell.exec(cleanupDb)
-    shell.exec(cleanupStatic)
-    cb(null, null)
-  }
-], function (e, r) {
-  go()
-})
+go()

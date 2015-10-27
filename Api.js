@@ -21,7 +21,18 @@ function Api (opts) {
   }
   log('API ' + JSON.stringify(opts, null, 2))
   this.db = new Pouchdb(opts.path)
-  this.mapping = {}
+  this.mapping = (function () {
+    var m = {}
+    this.getMaps(function (e, r) {
+      log('rebuilding mappings ')
+      r.rows.forEach(function (row) {
+        var k = path.basename(row.doc.static)
+        m[row.doc.url] = [row.doc._id, k]
+      })
+      log(JSON.stringify(m))
+    })
+    return m
+  }.bind(this))()
 }
 
 // todo make this a transform stream
