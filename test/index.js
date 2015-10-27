@@ -51,25 +51,21 @@ test('throws when options obj ismissing', function (t) {
 
 test('putMap to a broken link/image returns an error', function (t) {
   var opts = setup()
-  ;(function () {
-    opts.api.putMap({
-      'url': 'nope'
-    }, function (e, r) {
-      t.notEqual(e, null, 'callback error object should not be null')
-      t.equal(r, null, 'results object should be null')
-    })
-  })()
+  opts.api.putMap({
+    'url': 'nope'
+  }, function (e, r) {
+    t.notEqual(e, null, 'callback error object should not be null')
+    t.equal(r, null, 'results object should be null')
+  })
   t.end()
 })
 
 test('putMap with missiong options', function (t) {
   var opts = setup()
-  ;(function () {
-    opts.api.putMap(function (e, r) {
-      t.notEqual(e, null, 'callback error object should not be null')
-      t.equal(r, null, 'results object should be null')
-    })
-  })()
+  opts.api.putMap(function (e, r) {
+    t.notEqual(e, null, 'callback error object should not be null')
+    t.equal(r, null, 'results object should be null')
+  })
   t.end()
 })
 
