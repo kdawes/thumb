@@ -92,14 +92,14 @@ Api.prototype.putMap = function (opts, cb) {
   var self = this
   log('putMap : mappings ' + JSON.stringify(self.mapping))
   dlAndProcess(opts, function processedCallback (err, url) {
-    if (err) { return cb(err, null) }
+    if (err) { console.error('ERROR : dlAndProcess ' + err); return cb(err, null) }
     opts.static = url
     opts.timestamp = new Date().getTime()
     self.db.post(opts).then(function (r) {
       self.mapping[opts.url] = [r.id, path.basename(opts.static)]
-    // log('Mappings are now : ' + JSON.stringify(self.mapping, null, 2))
+      log('Mappings are now : ' + JSON.stringify(self.mapping, null, 2))
     }).catch(function (err) {
-      log('error updating maps in putMap' + err)
+      console.error('error updating maps in putMap' + err)
     })
     return cb(null, url)
   }.bind(this))
