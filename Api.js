@@ -7,44 +7,47 @@ var path = require('path')
 var request = require('request')
 var easyimage = require('easyimage')
 
-const STATIC = './static'
-const WIDTH = 120
-const HEIGHT = 120
+var log = (process.env.NODE_ENV === 'development') ?
+  console.log.bind(console, 'DBG>') : function () {}
+
+const STATIC_ROOT = './static'
+const DEFAULT_WIDTH = 120
+const DEFAULT_HEIGHT = 120
 
 // todo make this a transform stream
 function dlAndProcess (opts, cb) {
-  var fn = [STATIC, '/', hat().slice(0, 8)].join('')
-  var fn2 = [STATIC, '/', hat().slice(0, 8)].join('')
+  var downloadTargetFile = [STATIC_ROOT, '/', hat().slice(0, 8)].join('')
+  var resizedFile = [STATIC_ROOT, '/', hat().slice(0, 8)].join('')
 
-  console.log('dl and proccess ' + fn + ' ' + fn2)
-
-  var osFull = fs.createWriteStream(fn)
-  console.log('constructing promise')
+  var osFull = fs.createWriteStream(downloadTargetFile)
   var p = new Promise(
     function (resolve, reject) {
-      console.log('dl promise ' + opts.url)
       request(opts.url, function (err) {
-        if (err) { console.log('err'); reject(err) }
-        console.log('done?')
-        resolve(fn)
+        if (err) { reject(err) }
+        resolve(downloadTargetFile)
       }).pipe(osFull)
     }
-  )
-
-  p.then(function (f) {
-    console.log('resizing ' + f + ' => ' + fn2)
+  ).then(function (f) {
+    log('resizing ' + f + ' => ' + resizedFile)
     easyimage.resize({
-      'src': f,
-      'dst': fn2,
-      'width': WIDTH,
-      'height': HEIGHT
+      'src': downloadTargetFile,
+      'dst': resizedFile,
+      'width': opts.width || DEFAULT_WIDTH,
+      'height': opts.height || DEFAULT_HEIGHT
     }).then(function (file) {
-      console.log('done resizing!')
-      fs.unlink(f)
-      return cb(null, fn2)
+      log('done resizing!')
+      fs.unlink(f, function (e) {
+        if (e) {
+          log('unlink : Error : ', JSON.stringify(e))
+        }
+        return cb(null, resizedFile)
+      })
+    }).catch(function (err) {
+      log('resize fail :-/ retaining input file : ', f)
+      return cb(err, null)
     })
   }).catch(function (err) {
-    console.log('error resizing ' + err)
+    log('error resizing ', f)
     return cb(err, null)
   })
 }
@@ -54,25 +57,24 @@ function Api (opts) {
   if (!(this instanceof Api)) {
     return new Api(opts)
   }
-  console.log('API ' + JSON.stringify(opts, null, 2))
+  log('API ' + JSON.stringify(opts, null, 2))
   this.db = new Pouchdb(opts.path)
   this.mapping = (function () {
     var m = {}
     this.getMaps(function (e, r) {
-      console.log('rebuilding mappings ')
+      log('rebuilding mappings ')
       r.rows.forEach(function (row) {
         var k = path.basename(row.doc.static)
         m[row.doc.url] = [row.doc._id, k]
       })
-      console.log(JSON.stringify(m))
+      log(JSON.stringify(m))
     })
     return m
   }.bind(this))()
-
 }
 
 Api.prototype.getByUrl = function (url) {
-  console.log('getByUrl ' + url)
+  log('getByUrl ' + url)
   return this.mapping[url] ? this.mapping[url] : null
 }
 
@@ -81,25 +83,23 @@ Api.prototype.getMaps = function (cb) {
     .then(function (r) {
       return cb(null, r)
     }).catch(function (err) {
-    console.log('uh oh' + JSON.stringify(err))
+    log('uh oh' + JSON.stringify(err))
     return cb(err, null)
   })
 }
 
 Api.prototype.putMap = function (opts, cb) {
   var self = this
-  console.log('putMap : mappings ' + JSON.stringify(self.mapping))
-  dlAndProcess(opts, function (err, url) {
+  log('putMap : mappings ' + JSON.stringify(self.mapping))
+  dlAndProcess(opts, function processedCallback (err, url) {
     if (err) { return cb(err, null) }
     opts.static = url
     opts.timestamp = new Date().getTime()
     self.db.post(opts).then(function (r) {
-      console.log('Recorded : ' + JSON.stringify(r))
-      console.log('Mappings before : ' + JSON.stringify(self.mapping, null, 2))
       self.mapping[opts.url] = [r.id, path.basename(opts.static)]
-      console.log('Mappings are now : ' + JSON.stringify(self.mapping, null, 2))
+    // log('Mappings are now : ' + JSON.stringify(self.mapping, null, 2))
     }).catch(function (err) {
-      console.log('error updating maps in putMap' + err)
+      log('error updating maps in putMap' + err)
     })
     return cb(null, url)
   }.bind(this))
