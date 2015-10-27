@@ -6,6 +6,8 @@ var router = new director.http.Router()
 var ecstatic = require('ecstatic')
 var path = require('path')
 var cors = require('cors')
+var shell = require('shelljs')
+var async = require('async')
 
 var log = (process.env.NODE_ENV === 'development') ?
   console.log.bind(console, 'DBG>') : function () {}
@@ -19,7 +21,9 @@ const SERVER_URL = [ PROTO, '://', HOST, (PORT) ? ':' : '', PORT, '/' ].join('')
 
 var Api = require('./Api')
 var api = new Api({
-  'path': path.resolve(DB_PATH)
+  path: path.resolve(DB_PATH),
+  width: 120,
+  height: 120
 })
 
 router.get('/maps', function () {
@@ -65,24 +69,38 @@ router.post('/maps', {stream: true}, function () {
   }))
 })
 
-var server = union.createServer({
-  buffer: false,
-  before: [
-    cors(),
-    function (req, res) {
-      router.dispatch(req, res, function (err) {
-        if (err) {
-          res.emit('next')
-        }
+function go () {
+  var server = union.createServer({
+    buffer: false,
+    before: [
+      cors(),
+      function (req, res) {
+        router.dispatch(req, res, function (err) {
+          if (err) {
+            res.emit('next')
+          }
+        })
+      },
+      ecstatic({
+        root: path.resolve(STATIC),
+        autoIndex: false,
+        handleError: false,
+        showDir: false
       })
-    },
-    ecstatic({
-      root: path.resolve(STATIC),
-      autoIndex: false,
-      handleError: false,
-      showDir: false
-    })
-  ]
+    ]
+  })
+  server.listen(PORT)
+  log('Server listening : 5454 @' + path.resolve(STATIC))
+}
+
+async.series([
+  function (cb) {
+    var cleanupDb = ['rm -rf ', path.resolve(DB_PATH)].join('')
+    var cleanupStatic = ['rm -f ', STATIC, '/*'].join('')
+    shell.exec(cleanupDb)
+    shell.exec(cleanupStatic)
+    cb(null, null)
+  }
+], function (e, r) {
+  go()
 })
-server.listen(PORT)
-log('Server listening : 5454 @' + path.resolve(STATIC))

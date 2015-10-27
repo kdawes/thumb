@@ -14,12 +14,22 @@ const STATIC_ROOT = './static'
 const DEFAULT_WIDTH = 120
 const DEFAULT_HEIGHT = 120
 
+function Api (opts) {
+  if (!opts) { throw new Error('Missing options argument') }
+  if (!(this instanceof Api)) {
+    return new Api(opts)
+  }
+  log('API ' + JSON.stringify(opts, null, 2))
+  this.db = new Pouchdb(opts.path)
+  this.mapping = {}
+}
+
 // todo make this a transform stream
 function dlAndProcess (opts, cb) {
   var downloadTargetFile = [STATIC_ROOT, '/', hat().slice(0, 8)].join('')
   var resizedFile = [STATIC_ROOT, '/', hat().slice(0, 8)].join('')
-
   var osFull = fs.createWriteStream(downloadTargetFile)
+
   var p = new Promise(
     function (resolve, reject) {
       request(opts.url, function (err) {
@@ -50,27 +60,6 @@ function dlAndProcess (opts, cb) {
     log('error resizing ', f)
     return cb(err, null)
   })
-}
-
-function Api (opts) {
-  if (!opts) { throw new Error('Missing options argument') }
-  if (!(this instanceof Api)) {
-    return new Api(opts)
-  }
-  log('API ' + JSON.stringify(opts, null, 2))
-  this.db = new Pouchdb(opts.path)
-  this.mapping = (function () {
-    var m = {}
-    this.getMaps(function (e, r) {
-      log('rebuilding mappings ')
-      r.rows.forEach(function (row) {
-        var k = path.basename(row.doc.static)
-        m[row.doc.url] = [row.doc._id, k]
-      })
-      log(JSON.stringify(m))
-    })
-    return m
-  }.bind(this))()
 }
 
 Api.prototype.getByUrl = function (url) {
