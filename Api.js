@@ -1,6 +1,6 @@
 'use strict'
 var Pouchdb = require('pouchdb')
-//Pouchdb.plugin(require('pouchdb-find'))
+// Pouchdb.plugin(require('pouchdb-find'))
 var hat = require('hat')
 var fs = require('fs')
 var path = require('path')
@@ -11,8 +11,8 @@ var log = (process.env.NODE_ENV === 'development') ?
   console.log.bind(console, 'DBG>') : function () {}
 
 const STATIC_ROOT = './static'
-const DEFAULT_WIDTH = 120
-const DEFAULT_HEIGHT = 120
+const DEFAULT_WIDTH = process.env.WIDTH || 120
+const DEFAULT_HEIGHT = process.env.HEIGHT || 120
 
 function Api (opts) {
   if (!opts) { throw new Error('Api : Missing options argument') }
@@ -83,7 +83,7 @@ Api.prototype.getMaps = function (cb) {
     .then(function (r) {
       return cb(null, r)
     }).catch(function (err) {
-    log('uh oh' + JSON.stringify(err))
+    log('getMaps : ' + JSON.stringify(err) + err)
     return cb(err, null)
   })
 }

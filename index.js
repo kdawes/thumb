@@ -2,7 +2,7 @@
 var concat = require('concat-stream')
 var director = require('director')
 var union = require('union')
-var router = new director.http.Router()
+var router = new director.http.Router().configure({recurse: null})
 var ecstatic = require('ecstatic')
 var path = require('path')
 var cors = require('cors')
@@ -11,9 +11,9 @@ var log = (process.env.NODE_ENV === 'development') ?
   console.log.bind(console, 'DBG>') : function () {}
 
 const DB_PATH = './db/maps.pouchdb'
-const PROTO = 'http'
-const HOST = 'localhost'
-const PORT = 5454
+const PROTO = process.env.PROTO || 'http'
+const HOST = process.env.HOST || 'localhost'
+const PORT = process.env.PORT || 5454
 const STATIC = './static'
 const SERVER_URL = [ PROTO, '://', HOST, (PORT) ? ':' : '', PORT, '/' ].join('')
 
@@ -36,7 +36,6 @@ router.get('/maps', function () {
 })
 
 router.post('/maps', {stream: true}, function () {
-  log('router POST maps')
   var self = this
   this.req.pipe(concat(function (body) {
     try {
@@ -60,7 +59,7 @@ router.post('/maps', {stream: true}, function () {
         return self.res.json({'url': url})
       })
     } catch (err) {
-      console.error('trycatch error /maps' + JSON.stringify(err))
+      console.error('trycatch error /maps' + JSON.stringify(err) + ' ' + err)
       self.res.writeHead(500)
       return self.res.end()
     }
@@ -85,10 +84,15 @@ function go () {
         handleError: false,
         showDir: false
       })
-    ]
+    ],
+  //    https: {
+  //      cert: './ca.crt',
+  //      key: './ca.key',
+  //    },
   })
-  server.listen(PORT)
-  log('Server listening : 5454 @' + path.resolve(STATIC))
+  server.listen(PORT, function () {
+    console.log('Server listening : 5454 @' + path.resolve(STATIC))
+  })
 }
 
 go()

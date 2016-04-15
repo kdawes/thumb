@@ -1,24 +1,27 @@
-  trivial thumbnailer service thing 
- ===================================================
+thumbnailer / service
+=====================
 
 Dependencies :
 
 * node, imagemagick, npm, union, director, ecstatic, Pouchdb
 
  Usage :
-=========
+========
 
- Start it
- ========
-$ npm install && npm start
+* $ npm install && npm start
 
- Now post a {url:...} to the server
-====================================
-$ curl -X POST -H 'Content-type: application/json' -d  '{"url":"http://host/some.imgage.jpg"}' 'http://localhost:5454/maps'
+OR - with docker :
+
+* $ IP=$(docker-machine ip) && docker run --rm -it -e "HOST=${IP}" -e "WIDTH=120" -e "HEIGHT=120" -p 5454:5454 thumb
 
 
- Server returns you a url to the thumbnailed image :
-=====================================
+ ** Now post a {url:http://url.to.image/image.png} to the server
+
+* $ curl -X POST -H 'Content-type: application/json' -d  '{"url":"http://host/some.imgage.jpg"}' 'http://localhost:5454/maps'
+
+
+** Server returns you a url to the thumbnailed image :
+
 { 'url': 'http://localhost:5454/085c123a' }
 
 
