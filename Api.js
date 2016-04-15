@@ -7,8 +7,8 @@ var path = require('path')
 var request = require('request')
 var easyimage = require('easyimage')
 
-var log = (process.env.NODE_ENV === 'development') ?
-  console.log.bind(console, 'DBG>') : function () {}
+var log = (process.env.NODE_ENV === 'development')
+  ? console.log.bind(console, 'DBG>') : function () {}
 
 const STATIC_ROOT = './static'
 const DEFAULT_WIDTH = process.env.WIDTH || 120
@@ -41,7 +41,7 @@ function dlAndProcess (opts, cb) {
   var resizedFile = [STATIC_ROOT, '/', hat().slice(0, 8)].join('')
   var osFull = fs.createWriteStream(downloadTargetFile)
 
-  var p = new Promise(
+  new Promise(
     function (resolve, reject) {
       request(opts.url, function (err) {
         if (err) { reject(err) }
@@ -68,7 +68,7 @@ function dlAndProcess (opts, cb) {
       return cb(err, null)
     })
   }).catch(function (err) {
-    log('error resizing ', f)
+    log('error resizing ', err)
     return cb(err, null)
   })
 }
@@ -102,7 +102,7 @@ Api.prototype.putMap = function (opts, cb) {
       console.error('error updating maps in putMap' + err)
     })
     return cb(null, url)
-  }.bind(this))
+  })
 }
 
 exports = module.exports = Api

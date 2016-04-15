@@ -7,8 +7,8 @@ var ecstatic = require('ecstatic')
 var path = require('path')
 var cors = require('cors')
 
-var log = (process.env.NODE_ENV === 'development') ?
-  console.log.bind(console, 'DBG>') : function () {}
+var log = (process.env.NODE_ENV === 'development')
+  ? console.log.bind(console, 'DBG>') : function () {}
 
 const DB_PATH = './db/maps.pouchdb'
 const PROTO = process.env.PROTO || 'http'
@@ -84,7 +84,7 @@ function go () {
         handleError: false,
         showDir: false
       })
-    ],
+    ] // ,
   //    https: {
   //      cert: './ca.crt',
   //      key: './ca.key',

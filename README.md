@@ -17,7 +17,7 @@ OR - with docker :
 
  ** Now post a {url:http://url.to.image/image.png} to the server
 
-* $ curl -X POST -H 'Content-type: application/json' -d  '{"url":"http://host/some.imgage.jpg"}' 'http://localhost:5454/maps'
+* $ curl -X POST -H 'Content-type: application/json' -d  '{"url":"http://host/some.imgage.jpg"}' 'http://${IP}:5454/maps'
 
 
 ** Server returns you a url to the thumbnailed image :
