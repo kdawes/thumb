@@ -32,9 +32,10 @@
     "union": "^0.4.4"
   },
   "devDependencies": {
-    "tap": "^2.1.1",
     "async": "^1.5.0",
     "lodash": "^3.10.1",
-    "shelljs": "^0.5.3"
+    "shelljs": "^0.5.3",
+    "tap": "^2.1.1",
+    "tape": "^4.5.1"
   }
 }

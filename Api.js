@@ -1,6 +1,6 @@
 'use strict'
 var Pouchdb = require('pouchdb')
-Pouchdb.plugin(require('pouchdb-find'))
+//Pouchdb.plugin(require('pouchdb-find'))
 var hat = require('hat')
 var fs = require('fs')
 var path = require('path')
@@ -15,7 +15,7 @@ const DEFAULT_WIDTH = 120
 const DEFAULT_HEIGHT = 120
 
 function Api (opts) {
-  if (!opts) { throw new Error('Missing options argument') }
+  if (!opts) { throw new Error('Api : Missing options argument') }
   if (!(this instanceof Api)) {
     return new Api(opts)
   }
